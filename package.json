@@ -1,0 +1,48 @@
+{
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "vite build",
+        "dev": "vite",
+        "start": "node resources/openai/server.js"
+    },
+    "devDependencies": {
+        "autoprefixer": "^10.4.20",
+        "axios": "^1.8.2",
+        "concurrently": "^9.0.1",
+        "laravel-vite-plugin": "^1.1.1",
+        "postcss": "^8.4.47",
+        "tailwindcss": "^3.4.13",
+        "vite": "^6.0.6"
+    },
+    "dependencies": {
+        "@fortawesome/fontawesome-free": "^6.7.2",
+        "@google/generative-ai": "^0.24.1",
+        "@stripe/stripe-js": "^4.10.0",
+        "@vitejs/plugin-vue": "^5.2.1",
+        "@vueuse/core": "^12.8.2",
+        "canvas-confetti": "^1.9.3",
+        "class-variance-authority": "^0.7.1",
+        "cloudinary": "^2.6.0",
+        "clsx": "^2.1.1",
+        "dotenv": "^16.5.0",
+        "express": "^5.1.0",
+        "fs-extra": "^11.3.0",
+        "install": "^0.13.0",
+        "jsdom": "^26.0.0",
+        "leaflet": "^1.9.4",
+        "lucide-vue-next": "^0.479.0",
+        "node-fetch": "^3.3.2",
+        "npm": "^11.2.0",
+        "openai": "^4.93.0",
+        "path-browserify": "^1.0.1",
+        "pdf-poppler": "^0.2.1",
+        "pinia": "^3.0.1",
+        "reka-ui": "^2.0.2",
+        "tailwind-merge": "^3.0.2",
+        "tailwindcss-animate": "^1.0.7",
+        "vue": "^3.5.13",
+        "vue-i18n": "^11.1.5",
+        "vue-router": "^4.5.0"
+    }
+}

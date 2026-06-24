@@ -1,0 +1,50 @@
+Taak:
+Genereer het PV volgens het onderstaande sjabloon en neem enkel de relevante secties op.
+- Vermeld de rechtsvorm niet (bv. ELP).
+
+Sjabloon (placeholders vervangen):
+Proces-verbaal van de buitengewone algemene vergadering van {{assemblee.date|nl}}
+
+Cessie van aandelen, overdracht van maatschappelijke zetel, ontslag en benoeming van bestuurder.
+
+De buitengewone algemene vergadering van de vennootschap werd gehouden te {{assemblee.lieu}} op {{assemblee.date|nl}} om {{assemblee.heure_debut}} in aanwezigheid van:
+{{#participants}}- {{civilite}} {{nom}}, {{actions}} aandelen
+{{/participants}}
+
+Het volledige kapitaal is vertegenwoordigd ({{capital.total_actions}} aandelen), de vergadering kan geldig beslissen over de agenda:
+- Cessie van aandelen
+- Overdracht van maatschappelijke zetel
+- Ontslag van de bestuurder
+- Benoeming van de bestuurder
+
+Besluiten:
+{{#cessions.length}}
+1. Cessie van aandelen
+{{#cessions}}- {{cedant}} draagt {{quantite}} aandelen over aan {{acquereur}}, die aanvaardt.
+{{/cessions}}
+{{/cessions.length}}
+
+{{#repartition_parts.actionnaires.length}}
+De verdeling van de aandelen voor en na de wijziging, met in totaal {{repartition_parts.total_actions}} aandelen, luidt als volgt: {{#repartition_parts.actionnaires}}{{nom}}: {{avant}} aandelen voor de wijziging, {{apres}} aandelen na de wijziging. {{/repartition_parts.actionnaires}}
+{{/repartition_parts.actionnaires.length}}
+
+{{#transfert_siege.nouvelle_adresse}}
+2. Overdracht van maatschappelijke zetel
+De maatschappelijke zetel wordt overgedragen naar {{transfert_siege.nouvelle_adresse}}, met ingang op {{transfert_siege.date_effet|nl}}.
+{{/transfert_siege.nouvelle_adresse}}
+
+{{#administrateurs_demissionnaires.length}}
+3. Ontslag van de bestuurder
+Het ontslag van {{#administrateurs_demissionnaires}}{{.}}{{^last}}, {{/last}}{{/administrateurs_demissionnaires}} uit zijn functie van bestuurder met kwijting van alle aansprakelijkheid zonder voorbehoud, met ingang op {{assemblee.date|nl}}.
+{{/administrateurs_demissionnaires.length}}
+
+{{#administrateurs_nommes.length}}
+4. Benoeming van een bestuurder
+Deze buitengewone algemene vergadering aanvaardt de benoeming van {{#administrateurs_nommes}}{{.}}{{^last}}, {{/last}}{{/administrateurs_nommes}} tot bestuurder, die aanvaardt, met ingang op {{assemblee.date|nl}}.
+{{/administrateurs_nommes.length}}
+
+De agenda is uitgeput, de vergadering wordt gesloten om {{assemblee.heure_fin}}.
+
+Handtekeningen:
+{{#signataires}}- {{.}}
+{{/signataires}}

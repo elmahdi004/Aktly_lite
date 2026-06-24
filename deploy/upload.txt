@@ -1,0 +1,6 @@
+open ftp://USER@ftp.cluster014.hosting.ovh.net/ -passive=on
+option transfer binary
+# Synchronize local project folder -> remote web root (/)
+# WARNING: synchronize remote will upload and delete remote files to match local
+synchronize remote "C:\Users\hp\Downloads\Compressed\Aktly-main" /legakte
+exit

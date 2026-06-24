@@ -1,0 +1,167 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Aktly Lite — design tokens
+ * Palette: Émeraude & Ardoise (emerald #059669/#10b981 + slate #0f172a + mint #d1fae5)
+ * shadcn-style HSL CSS variables; consumed by tailwind.config.js (hsl(var(--token))).
+ */
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;        /* slate-900 */
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 161 94% 30%;           /* emerald-600 */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96%;         /* slate-100 */
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;             /* slate-100 */
+    --muted-foreground: 215 16% 47%;  /* slate-500 */
+    --accent: 149 80% 90%;            /* emerald-100 / mint */
+    --accent-foreground: 164 86% 16%; /* emerald-900 */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 161 94% 30%;
+    --warning: 32 95% 44%;
+    --border: 214 32% 91%;            /* slate-200 */
+    --input: 214 32% 91%;
+    --ring: 161 94% 30%;              /* emerald-600 */
+    --chart-1: 161 94% 30%;
+    --chart-2: 160 84% 39%;
+    --chart-3: 173 58% 39%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 215 25% 27%;
+    --radius: 0.75rem;
+    /* brand aliases for ad-hoc use */
+    --brand: 161 94% 30%;             /* emerald-600 */
+    --brand-strong: 163 94% 24%;      /* emerald-700 */
+    --brand-foreground: 0 0% 100%;
+  }
+  .dark {
+    --background: 222 47% 11%;         /* slate-900 */
+    --foreground: 210 40% 98%;
+    --card: 222 45% 13%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 45% 13%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 160 84% 39%;           /* emerald-500 */
+    --primary-foreground: 222 47% 11%;
+    --secondary: 215 25% 18%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 215 25% 18%;
+    --muted-foreground: 215 20% 65%;  /* slate-400 */
+    --accent: 164 86% 16%;            /* emerald-900 */
+    --accent-foreground: 149 80% 90%; /* mint */
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 210 40% 98%;
+    --success: 160 84% 39%;
+    --warning: 38 92% 50%;
+    --border: 215 25% 22%;
+    --input: 215 25% 22%;
+    --ring: 160 84% 39%;
+    --chart-1: 160 84% 39%;
+    --chart-2: 161 94% 30%;
+    --chart-3: 173 58% 45%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 210 40% 80%;
+    --brand: 160 84% 39%;
+    --brand-strong: 161 94% 30%;
+    --brand-foreground: 222 47% 11%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+/* ---- Aktly Lite reusable brand utilities ---- */
+@layer components {
+  .brand-gradient {
+    background-image: linear-gradient(135deg, hsl(161 94% 30%) 0%, hsl(160 84% 39%) 100%);
+  }
+  .brand-gradient-text {
+    background-image: linear-gradient(135deg, hsl(161 94% 30%) 0%, hsl(160 84% 39%) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .card-elevated {
+    @apply rounded-2xl border border-border bg-card shadow-sm;
+  }
+  .focus-ring {
+    @apply outline-none ring-2 ring-ring/40 ring-offset-2 ring-offset-background;
+  }
+  .font-display {
+    font-family: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+  }
+  .glass {
+    background: rgba(255, 255, 255, 0.82);
+    -webkit-backdrop-filter: blur(10px) saturate(135%);
+    backdrop-filter: blur(10px) saturate(135%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+  }
+  .glass-card {
+    background: rgba(255, 255, 255, 0.85);
+    -webkit-backdrop-filter: blur(10px) saturate(135%);
+    backdrop-filter: blur(10px) saturate(135%);
+    @apply rounded-3xl border border-white/60;
+    box-shadow: 0 24px 70px -28px rgba(2, 44, 34, 0.35);
+  }
+  .input-aurora {
+    @apply w-full rounded-xl border border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 transition-all duration-200;
+  }
+  .input-aurora:focus {
+    @apply border-emerald-500 outline-none ring-4 ring-emerald-500/15;
+  }
+  .btn-aurora {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white transition-all duration-200;
+    background-image: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    box-shadow: 0 12px 30px -10px rgba(5, 150, 105, 0.6);
+  }
+  .btn-aurora:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 18px 38px -12px rgba(5, 150, 105, 0.7);
+  }
+  .btn-aurora:active { transform: translateY(0); }
+  .btn-aurora:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
+}
+
+/* ---- Aurora background + motion ---- */
+.aurora-wrap { position: relative; overflow: hidden; }
+.aurora-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(46px);
+  opacity: 0.55;
+}
+.aurora-animate .aurora-blob {
+  will-change: transform;
+  animation: aurora-float 16s ease-in-out infinite;
+}
+@keyframes aurora-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -36px) scale(1.12); }
+  66% { transform: translate(-26px, 22px) scale(0.94); }
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up { animation: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-fade-up-1 { animation: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.07s both; }
+.animate-fade-up-2 { animation: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.14s both; }
+.animate-fade-up-3 { animation: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.21s both; }
+@media (prefers-reduced-motion: reduce) {
+  .aurora-blob { animation: none; }
+  .animate-fade-up, .animate-fade-up-1, .animate-fade-up-2, .animate-fade-up-3 { animation: none; }
+}
