@@ -10,7 +10,6 @@ import Dashboard from "./dashboard/Dashboard.vue";
 import DashboardAdmin from "./dashboard/admin/Index.vue";
 import ServicesAdmin from "./dashboard/admin/Services.vue";
 import SupportAdmin from "./dashboard/admin/Support.vue";
-import SettingsAdmin from "./dashboard/admin/Settings.vue";
 import addrssService from "./services/AddrssService.vue";
 import Index from "./form/Index.vue";
 import { useAuthStore } from "./pinia.js";
@@ -20,7 +19,6 @@ import MesDemandes from "./dashboard/client/MesDemandes.vue";
 import IndexClient from "./dashboard/client/Index.vue";
 import CreateTicket from "./dashboard/client/CreateTicket.vue";
 import Users from "./dashboard/admin/Users.vue";
-import Coupons from "./dashboard/admin/Coupons.vue";
 import CheckoutSuccess from "./subscription/CheckoutSuccess.vue";
 import CheckoutFailure from "./subscription/CheckoutFailure.vue";
 
@@ -88,33 +86,21 @@ const routes = [
                 meta: { requiresAdmin: true },
             },
             {
-                path: "admin/services",
+                path: "/admin/services",
                 name: "adminServices",
                 component: ServicesAdmin,
                 meta: { requiresAdmin: true },
             },
             {
-                path: "admin/services",
+                path: "/admin/support",
                 name: "adminSupport",
                 component: SupportAdmin,
-                meta: { requiresAdmin: true },
-            },
-            {
-                path: "admin/settings",
-                name: "adminSettings",
-                component: SettingsAdmin,
                 meta: { requiresAdmin: true },
             },
             {
                 path: "/admin/users",
                 name: "adminUsers",
                 component: Users,
-                meta: { requiresAdmin: true },
-            },
-            {
-                path: "/admin/coupons",
-                name: "adminCoupons",
-                component: Coupons,
                 meta: { requiresAdmin: true },
             },
             {

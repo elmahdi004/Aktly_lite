@@ -7,45 +7,8 @@
 
 
 <script setup>
-import { ref, computed } from "vue";
-import Step1 from "./steps/Step1.vue";
-import Step2 from "./steps/Step2.vue";
-import Step3 from "./steps/Step3.vue";
-import Register from "./auth/Register.vue";
-import axiosInstance from "@/axios.js";
-import { useRouter, useRoute } from "vue-router";
-import Sidebar from "./Sidebar.vue";
-import TopRightBar from "./components/TopRightBar.vue";
-
-const activeStep = ref(1);
-const router = useRouter();
-const route = useRoute();
-
-const isPublicRoute = computed(() => {
-    const publicRoutes = new Set([
-        "login",
-        "register",
-        "forgotpassword",
-        "password.reset",
-        "idanalyzeruser",
-        "verifyEmail",
-        "paySuccess",
-        "payCancel",
-    ]);
-    return publicRoutes.has(route.name);
-});
-
-const nextStep = () => {
-    activeStep.value += 1;
-};
-const preStep = () => {
-    activeStep.value -= 1;
-};
-const searchOnEntrepriseCallback = (data) => {
-    nextStep();
-};
-
-
+// App shell only. Every route owns its own full-screen layout (AuthLayout / Steps / Dashboard),
+// so there is no global chrome here — just <router-view /> plus the brand tokens in <style> below.
 </script>
 <style>
 /*

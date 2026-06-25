@@ -9,17 +9,8 @@ use Illuminate\Support\Facades\Response;
 
 class EnterpriseControllerNew extends Controller
 {
-    // The secret API key (should be stored securely in .env in production)
-    private const SECRET_API_KEY = 'G75tSbiroK0gda3tgeGOtLZ03O';
-
     public function read(Request $request)
     {
-        // API Key check
-        // $apiKey = $request->header('API_KEY');
-        // if ($apiKey !== self::SECRET_API_KEY) {
-        //     return response('Unauthorized', 401);
-        // }
-
         // Validate required parameters
         // $validator = Validator::make($request->all(), [
         //     'langue' => 'required|string',
@@ -40,8 +31,13 @@ class EnterpriseControllerNew extends Controller
         }
 
         try {
-            $username = env('KBO_WS_USERNAME', 'wsop4830');
-            $password = env('KBO_WS_PASSWORD', 'cBRABbE6qmvvFWBEnc6RJJVd');
+            // Credentials come from .env only — never hardcode them (they'd be committed).
+            $username = env('KBO_WS_USERNAME');
+            $password = env('KBO_WS_PASSWORD');
+            if (empty($username) || empty($password)) {
+                Log::error('KBO credentials missing (KBO_WS_USERNAME / KBO_WS_PASSWORD).');
+                return response()->json(['error' => 'KBO credentials are not configured.'], 500);
+            }
 
             // KBO Public Web Service endpoint — version R018.00.
             // (The previous kbopubws110000 path now returns HTTP 404.)
@@ -100,8 +96,11 @@ class EnterpriseControllerNew extends Controller
                 'SOAPAction: "http://fgov.economie.be/kbopub/ReadEnterprise"'
             ]);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+            // SSL verification is ON by default (secure); only disabled when KBO_WS_VERIFY_SSL=false
+            // is set explicitly (e.g. a local box whose CA bundle can't validate the KBO chain).
+            $verifySsl = filter_var(env('KBO_WS_VERIFY_SSL', true), FILTER_VALIDATE_BOOLEAN);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $verifySsl);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $verifySsl ? 2 : 0);
             curl_setopt($ch, CURLOPT_TIMEOUT, 30);
 
             $response = curl_exec($ch);

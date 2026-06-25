@@ -53,9 +53,6 @@
                 <DashboardItem v-if="isAdmin" :title="$t('dashboard.users')" :active="false" pathName="adminUsers">
                     <Users class="h-[18px] w-[18px]" />
                 </DashboardItem>
-                <DashboardItem v-if="isAdmin" :title="$t('dashboard.coupons')" :active="false" pathName="adminCoupons">
-                    <Ticket class="h-[18px] w-[18px]" />
-                </DashboardItem>
                 <DashboardItem v-if="isAdmin" :title="$t('dashboard.support')" :active="false" pathName="adminSupport">
                     <MessageSquare class="h-[18px] w-[18px]" />
                 </DashboardItem>

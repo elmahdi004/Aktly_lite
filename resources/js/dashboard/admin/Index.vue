@@ -1,153 +1,131 @@
-<!-- Dashboard.vue -->
 <template>
-    <div class="dashboard">
-        <!-- Stats Cards -->
-        <div class="stats-container">
-            <div class="stat-card" v-for="(stat, index) in stats" :key="index">
-                <div
-                    class="stat-icon"
-                    :style="{ backgroundColor: stat.bgColor }"
-                >
-                    <i :class="stat.icon"></i>
+    <div class="space-y-6">
+        <!-- header -->
+        <div>
+            <h1 class="font-display text-2xl font-extrabold tracking-tight text-slate-900">
+                {{ isNl ? 'Beheerdersoverzicht' : 'Tableau de bord' }}
+            </h1>
+            <p class="mt-1 text-sm text-slate-500">
+                {{ isNl ? 'Realtime overzicht van dossiers, gebruikers en aanvragen.' : 'Vue d’ensemble en temps réel des dossiers, utilisateurs et demandes.' }}
+            </p>
+        </div>
+
+        <!-- stat cards -->
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div v-for="s in statCards" :key="s.key" class="glass-card flex items-center gap-4 p-5">
+                <div class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl" :class="s.tile">
+                    <component :is="s.icon" class="h-6 w-6" />
                 </div>
-                <div class="stat-info">
-                    <h3>{{ stat.title }}</h3>
-                    <span class="stat-number">{{ stat.count }}</span>
+                <div>
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ s.label }}</p>
+                    <p class="font-display text-2xl font-extrabold text-slate-900">{{ s.value }}</p>
                 </div>
             </div>
         </div>
 
-        <!-- Requests Table -->
+        <!-- recent demandes -->
+        <section class="glass-card overflow-hidden p-0">
+            <header class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+                <h2 class="font-display text-base font-bold text-slate-800">{{ isNl ? 'Recente dossiers' : 'Dernières demandes' }}</h2>
+                <router-link :to="{ name: 'adminServices' }" class="inline-flex items-center gap-1 text-sm font-semibold text-emerald-600 hover:text-emerald-700">
+                    {{ isNl ? 'Alles bekijken' : 'Tout voir' }} <ArrowUpRight class="h-4 w-4" />
+                </router-link>
+            </header>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50/70 text-xs uppercase tracking-wide text-slate-400">
+                        <tr>
+                            <th class="px-5 py-3 font-semibold">{{ isNl ? 'Onderneming' : 'Entreprise' }}</th>
+                            <th class="px-5 py-3 font-semibold">{{ isNl ? 'Taal' : 'Langue' }}</th>
+                            <th class="px-5 py-3 font-semibold">{{ isNl ? 'Klant' : 'Client' }}</th>
+                            <th class="px-5 py-3 font-semibold">{{ isNl ? 'Status' : 'Statut' }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="r in requests" :key="r.id" class="border-t border-slate-100 transition hover:bg-emerald-50/40">
+                            <td class="px-5 py-3 font-medium text-slate-700">{{ r.enterprise_number }}</td>
+                            <td class="px-5 py-3 uppercase text-slate-500">{{ r.langue || r.langue_entreprise || '—' }}</td>
+                            <td class="px-5 py-3 text-slate-600">{{ r.user?.name || '—' }}</td>
+                            <td class="px-5 py-3"><span class="rounded-full px-2.5 py-1 text-xs font-semibold" :class="badge(r.status)">{{ statusText(r.status) }}</span></td>
+                        </tr>
+                        <tr v-if="!requests.length">
+                            <td colspan="4" class="px-5 py-8 text-center text-sm text-slate-400">{{ isNl ? 'Geen dossiers.' : 'Aucune demande.' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
-        <TableSection
-            v-if="requests && requests.length > 0"
-            title="Dernières demandes"
-            :headers="tableHeaders"
-        >
-            <tr v-for="request in requests" :key="request">
-                <td>{{ request.id }}</td>
-                <td>{{ request.enterprise_number }}</td>
-                <td>{{ request.langue }}</td>
-                <td>
-                    <span
-                        :class="[
-                            'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
-                            {
-                                'text-red-800 bg-red-100':
-                                    request.status === 'cancelled',
-                            },
-                            {
-                                'text-green-800 bg-green-100':
-                                    request.status === 'resolved',
-                            },
-                            {
-                                'text-yellow-800 bg-yellow-100':
-                                    request.status === 'pending',
-                            },
-                        ]"
-                    >
-                        {{ request.status }}
-                    </span>
-                </td>
-                <td>{{ request.user.name }}</td>
-                <td>{{ request.address_service ? "X" : "O" }}</td>
-                <td>{{ request.dirigeants_service ? "X" : "O" }}</td>
-                <td>{{ request.cession_parts_service ? "X" : "O" }}</td>
-            </tr>
-        </TableSection>
-        <!-- Messages Table -->
-        <TableSection
-            v-if="requests && requests.length > 0"
-            title="Derniers réclamations"
-            :headers="messageHeaders"
-        >
-            <tr v-for="message in messages" :key="message.id">
-                <td>{{ message.id }}</td>
-                <td>{{ message.type }}</td>
-                <td>{{ message.demande.user.name }}</td>
-                <td>{{ message.demande_id }}</td>
-                <td>{{ message.email }}</td>
-                <td>
-                    <span
-                        :class="[
-                            'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
-                            {
-                                'text-red-800 bg-red-100':
-                                    message.status === 'cancelled',
-                            },
-                            {
-                                'text-green-800 bg-green-100':
-                                    message.status === 'resolved',
-                            },
-                            {
-                                'text-yellow-800 bg-yellow-100':
-                                    message.status === 'pending',
-                            },
-                        ]"
-                    >
-                        {{ message.status }}
-                    </span>
-                </td>
-                <td>{{ formatDateTime(message.created_at) }}</td>
-            </tr>
-        </TableSection>
+        <!-- recent tickets -->
+        <section class="glass-card overflow-hidden p-0">
+            <header class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+                <h2 class="font-display text-base font-bold text-slate-800">{{ isNl ? 'Recente meldingen' : 'Dernières réclamations' }}</h2>
+                <router-link :to="{ name: 'adminSupport' }" class="inline-flex items-center gap-1 text-sm font-semibold text-emerald-600 hover:text-emerald-700">
+                    {{ isNl ? 'Alles bekijken' : 'Tout voir' }} <ArrowUpRight class="h-4 w-4" />
+                </router-link>
+            </header>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50/70 text-xs uppercase tracking-wide text-slate-400">
+                        <tr>
+                            <th class="px-5 py-3 font-semibold">Type</th>
+                            <th class="px-5 py-3 font-semibold">{{ isNl ? 'Klant' : 'Client' }}</th>
+                            <th class="px-5 py-3 font-semibold">Email</th>
+                            <th class="px-5 py-3 font-semibold">{{ isNl ? 'Status' : 'Statut' }}</th>
+                            <th class="px-5 py-3 font-semibold">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="m in messages" :key="m.id" class="border-t border-slate-100 transition hover:bg-emerald-50/40">
+                            <td class="px-5 py-3 font-medium text-slate-700">{{ m.type }}</td>
+                            <td class="px-5 py-3 text-slate-600">{{ m.demande?.user?.name || '—' }}</td>
+                            <td class="px-5 py-3 text-slate-500">{{ m.email }}</td>
+                            <td class="px-5 py-3"><span class="rounded-full px-2.5 py-1 text-xs font-semibold" :class="badge(m.status)">{{ statusText(m.status) }}</span></td>
+                            <td class="px-5 py-3 text-slate-500">{{ formatDate(m.created_at) }}</td>
+                        </tr>
+                        <tr v-if="!messages.length">
+                            <td colspan="5" class="px-5 py-8 text-center text-sm text-slate-400">{{ isNl ? 'Geen meldingen.' : 'Aucune réclamation.' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
-import TableSection from "@/components/ui/TableSectio.vue";
+import { ref, computed, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import axiosInstance from "@/axios";
-const count = ref({
-    demandes: 0,
-    utilisateurs: 0,
-    reclamation: 0,
-});
-const stats = ref([
-    {
-        title: "Demandes",
-        count: count.value.demandes,
-        icon: "fas fa-hand-paper",
-        bgColor: "#059669",
-    },
-    {
-        title: "Utilisateurs",
-        count: count.value.utilisateurs,
-        icon: "fas fa-users",
-        bgColor: "#059669",
-    },
-    {
-        title: "Réclamation",
-        count: count.value.reclamation,
-        icon: "fas fa-envelope",
-        bgColor: "#059669",
-    },
+import { FileText, Users, MessageSquare, ArrowUpRight } from "lucide-vue-next";
+
+const { locale } = useI18n();
+const isNl = computed(() => locale.value === "nl");
+
+const count = ref({ demandes: 0, users: 0, tickets: 0 });
+const requests = ref([]);
+const messages = ref([]);
+
+const statCards = computed(() => [
+    { key: "d", label: isNl.value ? "Dossiers" : "Demandes", value: count.value.demandes, icon: FileText, tile: "bg-emerald-100 text-emerald-600" },
+    { key: "u", label: isNl.value ? "Gebruikers" : "Utilisateurs", value: count.value.users, icon: Users, tile: "bg-sky-100 text-sky-600" },
+    { key: "t", label: isNl.value ? "Meldingen" : "Réclamations", value: count.value.tickets, icon: MessageSquare, tile: "bg-amber-100 text-amber-600" },
 ]);
 
-const tableHeaders = [
-    "Id",
-    "Enterprise number",
-    "Langue",
-    "Status",
-    "Client name",
-    "Adresse service",
-    "Dirigeants Service",
-    "Cession se part service",
-];
-
-const messageHeaders = [
-    "Id",
-    "Type",
-    "client name",
-    "demande id",
-    "email",
-    "status",
-    "date",
-];
-
-const requests = ref([]);
-
-const messages = ref([]);
+const badge = (s) => {
+    const v = (s || "").toLowerCase();
+    if (["resolved", "validated", "valide", "validé", "approved"].includes(v)) return "bg-emerald-100 text-emerald-700";
+    if (["cancelled", "canceled", "refused", "rejected"].includes(v)) return "bg-rose-100 text-rose-700";
+    if (["pending", "en_attente", "submitted"].includes(v)) return "bg-amber-100 text-amber-700";
+    return "bg-slate-100 text-slate-600";
+};
+const statusText = (s) => {
+    const v = (s || "").toLowerCase();
+    const fr = { resolved: "Validé", validated: "Validé", cancelled: "Refusé", canceled: "Refusé", pending: "En attente" };
+    const nl = { resolved: "Goedgekeurd", validated: "Goedgekeurd", cancelled: "Geweigerd", canceled: "Geweigerd", pending: "In behandeling" };
+    return (isNl.value ? nl : fr)[v] || s || "—";
+};
+const formatDate = (d) => (d ? new Date(d).toLocaleDateString(isNl.value ? "nl-BE" : "fr-BE") : "—");
 
 onMounted(() => {
     getCount();
@@ -156,190 +134,14 @@ onMounted(() => {
 });
 const getCount = async () => {
     try {
-        const response = await axiosInstance.get("count");
-        if (response.data) {
-            console.log("Count");
-            count.value.demandes = response.data.demandes;
-            count.value.utilisateurs = response.data.users;
-            count.value.reclamation = response.data.tickets;
-        }
-    } catch (error) {
-        console.error(error);
-    }
+        const { data } = await axiosInstance.get("count");
+        count.value = { demandes: data.demandes || 0, users: data.users || 0, tickets: data.tickets || 0 };
+    } catch (e) { console.error(e); }
 };
 const getLastDemandes = async () => {
-    try {
-        const response = await axiosInstance.get("last-demandes");
-        requests.value = response.data;
-        // console.log(response.data);
-    } catch (error) {
-        console.error(error);
-    }
+    try { const { data } = await axiosInstance.get("last-demandes"); requests.value = Array.isArray(data) ? data : []; } catch (e) { console.error(e); }
 };
 const getLastTickets = async () => {
-    try {
-        const response = await axiosInstance.get("last-tickets");
-        messages.value = response.data;
-        // console.log(response.data);
-    } catch (error) {
-        console.error(error);
-    }
+    try { const { data } = await axiosInstance.get("last-tickets"); messages.value = Array.isArray(data) ? data : []; } catch (e) { console.error(e); }
 };
-const formatDateTime = (dateString) => {
-    const date = new Date(dateString);
-    return date.toISOString().replace("T", " ").split(".")[0];
-};
-watch(
-    count,
-    (newCount) => {
-        stats.value = [
-            {
-                title: "Demandes",
-                count: newCount.demandes,
-                icon: "fas fa-hand-paper",
-                bgColor: "#059669",
-            },
-            {
-                title: "Utilisateurs",
-                count: newCount.utilisateurs,
-                icon: "fas fa-users",
-                bgColor: "#059669",
-            },
-            {
-                title: "Réclamation",
-                count: newCount.reclamation,
-                icon: "fas fa-envelope",
-                bgColor: "#059669",
-            },
-        ];
-    },
-    { deep: true }
-);
 </script>
-
-<style scoped>
-.dashboard {
-    padding: 2rem;
-    /* background-color: #f8f9fa; */
-    min-height: 100vh;
-}
-
-.stats-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.stat-card {
-    background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    display: flex;
-    align-items: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s;
-}
-
-.stat-card:hover {
-    transform: translateY(-5px);
-}
-
-.stat-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 1rem;
-}
-
-.stat-icon i {
-    color: white;
-    font-size: 1.5rem;
-}
-
-.stat-info h3 {
-    margin: 0;
-    color: #64748b;
-    font-size: 0.875rem;
-    font-weight: 500;
-}
-
-.stat-number {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #1e293b;
-}
-
-.table-section {
-    background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-    /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); */
-}
-
-.section-title {
-    color: #1e293b;
-    margin-bottom: 1.5rem;
-    font-size: 1.25rem;
-}
-
-.table-container {
-    overflow-x: auto;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th {
-    background-color: #f8f9fa;
-    padding: 1rem;
-    text-align: left;
-    font-weight: 600;
-    color: #64748b;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-td {
-    padding: 1rem;
-    border-bottom: 1px solid #e2e8f0;
-    color: #475569;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.status-badge {
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 0.875rem;
-    font-weight: 500;
-}
-
-.validé {
-    background-color: #dcfce7;
-    color: #166534;
-}
-
-.non-validé {
-    background-color: #fee2e2;
-    color: #991b1b;
-}
-
-@media (max-width: 768px) {
-    .dashboard {
-        padding: 1rem;
-    }
-
-    .stats-container {
-        grid-template-columns: 1fr;
-    }
-}
-</style>

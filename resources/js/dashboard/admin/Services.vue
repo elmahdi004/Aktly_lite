@@ -1,295 +1,103 @@
-<!-- Dashboard.vue -->
 <template>
-    <div class="dashboard">
-        <!-- Requests Table -->
-        <TableSection
-            v-if="requests && requests.length > 0"
-            title="Les demandes"
-            :headers="tableHeaders"
-        >
-            <tr v-for="request in requests" :key="request">
-                <td>{{ request.id }}</td>
-                <td>{{ request.enterprise_number }}</td>
-                <td>{{ request.langue }}</td>
-                <td>
-                    <span
-                        :class="[
-                            'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
-                            {
-                                'text-red-800 bg-red-100':
-                                    request.status === 'cancelled',
-                            },
-                            {
-                                'text-green-800 bg-green-100':
-                                    request.status === 'resolved',
-                            },
-                            {
-                                'text-yellow-800 bg-yellow-100':
-                                    request.status === 'pending',
-                            },
-                        ]"
-                    >
-                        {{ request.status }}
-                    </span>
-                </td>
-                <td>{{ request.user.name }}</td>
-                <td>{{ request.address_service ? "X" : "O" }}</td>
-                <td>{{ request.dirigeants_service ? "X" : "O" }}</td>
-                <td>{{ request.cession_parts_service ? "X" : "O" }}</td>
-                <td>
-                    <button
-                        class="btn btn-valider"
-                        @click="ChangeTheStateOfRequest(request, true)"
-                    >
-                        Valider
-                    </button>
-                </td>
-                <td>
-                    <button
-                        class="btn btn-decline"
-                        @click="ChangeTheStateOfRequest(request, false)"
-                    >
-                        Refuser
-                    </button>
-                </td>
-                <td>
-                    <button
-                        class="btn btn-modifier"
-                        @click="updateRequest(request)"
-                    >
-                        Modifer
-                    </button>
-                </td>
-            </tr>
-        </TableSection>
+    <div class="space-y-6">
+        <div>
+            <h1 class="font-display text-2xl font-extrabold tracking-tight text-slate-900">
+                {{ isNl ? 'Dossiers' : 'Demandes' }}
+            </h1>
+            <p class="mt-1 text-sm text-slate-500">
+                {{ isNl ? 'Valideer, weiger of bekijk de ingediende zetelverplaatsingen.' : 'Validez, refusez ou consultez les transferts de siège soumis.' }}
+            </p>
+        </div>
+
+        <section class="glass-card overflow-hidden p-0">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50/70 text-xs uppercase tracking-wide text-slate-400">
+                        <tr>
+                            <th class="px-5 py-3 font-semibold">{{ isNl ? 'Onderneming' : 'Entreprise' }}</th>
+                            <th class="px-5 py-3 font-semibold">{{ isNl ? 'Taal' : 'Langue' }}</th>
+                            <th class="px-5 py-3 font-semibold">{{ isNl ? 'Klant' : 'Client' }}</th>
+                            <th class="px-5 py-3 font-semibold">{{ isNl ? 'Dienst' : 'Service' }}</th>
+                            <th class="px-5 py-3 font-semibold">{{ isNl ? 'Status' : 'Statut' }}</th>
+                            <th class="px-5 py-3 text-right font-semibold">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="r in requests" :key="r.id" class="border-t border-slate-100 transition hover:bg-emerald-50/40">
+                            <td class="px-5 py-3 font-medium text-slate-700">{{ r.enterprise_number }}</td>
+                            <td class="px-5 py-3 uppercase text-slate-500">{{ r.langue || r.langue_entreprise || '—' }}</td>
+                            <td class="px-5 py-3 text-slate-600">{{ r.user?.name || '—' }}</td>
+                            <td class="px-5 py-3 text-slate-500">{{ isNl ? 'Zetelverplaatsing' : 'Transfert de siège' }}</td>
+                            <td class="px-5 py-3"><span class="rounded-full px-2.5 py-1 text-xs font-semibold" :class="badge(r.status)">{{ statusText(r.status) }}</span></td>
+                            <td class="px-5 py-3">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button @click="changeState(r, true)" :title="isNl ? 'Goedkeuren' : 'Valider'"
+                                        class="grid h-8 w-8 place-items-center rounded-lg bg-emerald-100 text-emerald-600 transition hover:bg-emerald-600 hover:text-white">
+                                        <Check class="h-4 w-4" />
+                                    </button>
+                                    <button @click="changeState(r, false)" :title="isNl ? 'Weigeren' : 'Refuser'"
+                                        class="grid h-8 w-8 place-items-center rounded-lg bg-rose-100 text-rose-600 transition hover:bg-rose-600 hover:text-white">
+                                        <X class="h-4 w-4" />
+                                    </button>
+                                    <button @click="viewDossier(r)" :title="isNl ? 'Bekijken' : 'Consulter'"
+                                        class="grid h-8 w-8 place-items-center rounded-lg bg-slate-100 text-slate-600 transition hover:bg-slate-800 hover:text-white">
+                                        <Eye class="h-4 w-4" />
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr v-if="!requests.length">
+                            <td colspan="6" class="px-5 py-10 text-center text-sm text-slate-400">{{ isNl ? 'Geen dossiers.' : 'Aucune demande.' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
-import TableSection from "@/components/ui/TableSectio.vue";
-import axiosInstance from "@/axios.js";
+import { ref, computed, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
-const tableHeaders = [
-    "Id",
-    "Enterprise number",
-    "Langue",
-    "Status",
-    "Client name",
-    "Adresse service",
-    "Dirigeants Service",
-    "Cession se part service",
-    "Valider",
-    "Refuser",
-    "Modifier",
-];
+import axiosInstance from "@/axios.js";
+import { Check, X, Eye } from "lucide-vue-next";
 
-const requests = ref([]);
+const { locale } = useI18n();
+const isNl = computed(() => locale.value === "nl");
 const router = useRouter();
-onMounted(() => {
-    getDemandes();
-});
-const getDemandes = async () => {
-    try {
-        const response = await axiosInstance.get("demandes");
-        requests.value = response.data;
-        // console.log(response.data);
-    } catch (error) {
-        console.error(error);
-    }
+const requests = ref([]);
+
+const badge = (s) => {
+    const v = (s || "").toLowerCase();
+    if (["resolved", "validated", "valide", "validé", "approved"].includes(v)) return "bg-emerald-100 text-emerald-700";
+    if (["cancelled", "canceled", "refused", "rejected"].includes(v)) return "bg-rose-100 text-rose-700";
+    if (["pending", "en_attente", "submitted"].includes(v)) return "bg-amber-100 text-amber-700";
+    return "bg-slate-100 text-slate-600";
+};
+const statusText = (s) => {
+    const v = (s || "").toLowerCase();
+    const fr = { resolved: "Validé", validated: "Validé", cancelled: "Refusé", canceled: "Refusé", pending: "En attente" };
+    const nl = { resolved: "Goedgekeurd", validated: "Goedgekeurd", cancelled: "Geweigerd", canceled: "Geweigerd", pending: "In behandeling" };
+    return (isNl.value ? nl : fr)[v] || s || "—";
 };
 
-// valider ou refuser une demande
+onMounted(getDemandes);
+async function getDemandes() {
+    try { const { data } = await axiosInstance.get("demandes"); requests.value = Array.isArray(data) ? data : []; }
+    catch (e) { console.error(e); }
+}
 
-const ChangeTheStateOfRequest = (demande, valider) => {
-    axiosInstance
-        .post(`demandes/change_state/${demande.id}`, { state: valider })
-        .then(({ data }) => {
-            if (valider) {
-                requests.value.find((ele) => ele.id == demande.id).status =
-                    "resolved";
-            } else {
-                requests.value.find((ele) => ele.id == demande.id).status =
-                    "canceled";
-            }
+const changeState = (demande, valider) => {
+    axiosInstance.post(`demandes/change_state/${demande.id}`, { state: valider })
+        .then(() => {
+            const row = requests.value.find((e) => e.id === demande.id);
+            if (row) row.status = valider ? "resolved" : "canceled";
         })
-        .catch((error) => console.log(error));
+        .catch((e) => console.error(e));
 };
 
-// function for update request
-
-const updateRequest = (request) => {
-    router.push({ name: "json" });
+const viewDossier = (request) => {
+    router.push({ name: "form", query: { demande_id: request.id } });
 };
 </script>
-
-<style scoped>
-.dashboard {
-    padding: 2rem;
-    /* background-color: #f8f9fa; */
-    min-height: 100vh;
-}
-
-.stats-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.stat-card {
-    background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    display: flex;
-    align-items: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s;
-}
-
-.stat-card:hover {
-    transform: translateY(-5px);
-}
-
-.stat-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 1rem;
-}
-
-.stat-icon i {
-    color: white;
-    font-size: 1.5rem;
-}
-
-.stat-info h3 {
-    margin: 0;
-    color: #64748b;
-    font-size: 0.875rem;
-    font-weight: 500;
-}
-
-.stat-number {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #1e293b;
-}
-
-.table-section {
-    background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-    /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); */
-}
-
-.section-title {
-    color: #1e293b;
-    margin-bottom: 1.5rem;
-    font-size: 1.25rem;
-}
-
-.table-container {
-    overflow-x: auto;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th {
-    background-color: #f8f9fa;
-    padding: 1rem;
-    text-align: left;
-    font-weight: 600;
-    color: #64748b;
-}
-
-td {
-    padding: 1rem;
-    border-bottom: 1px solid #e2e8f0;
-    color: #475569;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.status-badge {
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 0.875rem;
-    font-weight: 500;
-}
-
-.validé {
-    background-color: #dcfce7;
-    color: #166534;
-}
-
-.non-validé {
-    background-color: #fee2e2;
-    color: #991b1b;
-}
-
-@media (max-width: 768px) {
-    .dashboard {
-        padding: 1rem;
-    }
-
-    .stats-container {
-        grid-template-columns: 1fr;
-    }
-}
-
-.btn {
-    padding: 7px 16px;
-    font-size: 16px;
-    font-weight: bold;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    /* position: relative;
-    z-index:0; */
-    overflow: hidden;
-}
-
-.btn-valider {
-    background: linear-gradient(135deg, #4ade80, #22c55e);
-    color: white;
-}
-
-.btn-valider:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 24px rgba(34, 197, 94, 0.4);
-}
-
-.btn-decline {
-    background: linear-gradient(135deg, #f87171, #ef4444);
-    color: white;
-}
-
-.btn-decline:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 24px rgba(239, 68, 68, 0.4);
-}
-.btn-modifier {
-    background: linear-gradient(
-        135deg,
-        #60a5fa,
-        #3b82f6
-    ); /* bleu clair à bleu foncé */
-    color: white;
-}
-
-.btn-modifier:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 24px rgba(59, 130, 246, 0.4);
-}
-</style>

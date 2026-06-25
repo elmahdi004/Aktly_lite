@@ -98,22 +98,6 @@
                             >
                                 <MapPin class="h-3.5 w-3.5" /> {{ $t('dashboard.adresse') }}
                             </button>
-                            <button
-                                type="button"
-                                @click="selectedService = 'dirigeants'"
-                                class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition"
-                                :class="selectedService === 'dirigeants' ? 'bg-emerald-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'"
-                            >
-                                <Users class="h-3.5 w-3.5" /> {{ $t('dashboard.dirigeants') }}
-                            </button>
-                            <button
-                                type="button"
-                                @click="selectedService = 'cession_parts'"
-                                class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition"
-                                :class="selectedService === 'cession_parts' ? 'bg-emerald-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'"
-                            >
-                                <FileText class="h-3.5 w-3.5" /> {{ $t('dashboard.cession_parts') }}
-                            </button>
                         </div>
                     </div>
 
